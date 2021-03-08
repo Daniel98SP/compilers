@@ -1,31 +1,3 @@
-//////////////////////////////////////////////////////////////////////
-//
-//    Asl - Another simple language (grammar)
-//
-//    Copyright (C) 2017  Universitat Politecnica de Catalunya
-//
-//    This library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU General Public License
-//    as published by the Free Software Foundation; either version 3
-//    of the License, or (at your option) any later version.
-//
-//    This library is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Affero General Public License for more details.
-//
-//    You should have received a copy of the GNU Affero General Public
-//    License along with this library; if not, write to the Free Software
-//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-//
-//    contact: José Miguel Rivero (rivero@cs.upc.edu)
-//             Computer Science Department
-//             Universitat Politecnica de Catalunya
-//             despatx Omega.110 - Campus Nord UPC
-//             08034 Barcelona.  SPAIN
-//
-//////////////////////////////////////////////////////////////////////
-
 grammar Asl;
 
 //////////////////////////////////////////////////
@@ -46,7 +18,7 @@ declarations
         ;
 
 variable_decl
-        : VAR ID ':' type
+        : VAR (ID)+ ':' type
         ;
 
 type    : INT
@@ -79,7 +51,7 @@ left_expr
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : expr op=MUL expr                    # arithmetic
         | expr op=PLUS expr                   # arithmetic
-        | expr op=EQUAL expr                  # relational
+        | expr op=EQ expr                  # relational
         | INTVAL                              # value
         | ident                               # exprIdent
         ;
@@ -91,22 +63,42 @@ ident   : ID
 /// Lexer Rules
 //////////////////////////////////////////////////
 
+// Assign
 ASSIGN    : '=' ;
-EQUAL     : '==' ;
-PLUS      : '+' ;
-MUL       : '*';
-VAR       : 'var';
-INT       : 'int';
-IF        : 'if' ;
-THEN      : 'then' ;
-ELSE      : 'else' ;
-ENDIF     : 'endif' ;
-FUNC      : 'func' ;
+
+// Comparation and arithmetic signs
+EQ        : '==' ;
+NEQ       : '!=' ;
+LT        : '<'  ;
+MT        : '>'  ;
+LET       : '<=' ;
+MET       : '>=' ;
+PLUS      : '+'  ;
+MUL       : '*'  ;
+
+// Key words
+VAR       : 'var'     ;
+INT       : 'int'     ;
+FLOAT     : 'float'   ;
+BOOL      : 'bool'    ;
+CHAR      : 'char'    ;
+IF        : 'if'      ;
+THEN      : 'then'    ;
+ELSE      : 'else'    ;
+ENDIF     : 'endif'   ;
+FUNC      : 'func'    ;
 ENDFUNC   : 'endfunc' ;
-READ      : 'read' ;
-WRITE     : 'write' ;
+READ      : 'read'    ;
+WRITE     : 'write'   ;
+
+// ID names
 ID        : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
+
+// Data representation
 INTVAL    : ('0'..'9')+ ;
+FLOATVAL  : ('0'..'9')+ '.' ('0'..'9')+ ;
+BOOLVAL   : ('true' | 'false') ;
+CHARVAL   : '\'' ('a'..'z'|'A'..'Z'|'0'..'9'|'\n'|'\t'|'\''|' '|'_'|'@') '\'' ;
 
 // Strings (in quotes) with escape sequences
 STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;
