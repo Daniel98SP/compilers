@@ -45,9 +45,17 @@ public:
 
     virtual antlrcpp::Any visitLeft_expr(AslParser::Left_exprContext *context) = 0;
 
-    virtual antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *context) = 0;
+    virtual antlrcpp::Any visitExprBrac(AslParser::ExprBracContext *context) = 0;
+
+    virtual antlrcpp::Any visitExprOr(AslParser::ExprOrContext *context) = 0;
+
+    virtual antlrcpp::Any visitExprNot(AslParser::ExprNotContext *context) = 0;
+
+    virtual antlrcpp::Any visitExprAnd(AslParser::ExprAndContext *context) = 0;
 
     virtual antlrcpp::Any visitArithmetic(AslParser::ArithmeticContext *context) = 0;
+
+    virtual antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *context) = 0;
 
     virtual antlrcpp::Any visitRelational(AslParser::RelationalContext *context) = 0;
 

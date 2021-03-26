@@ -18,10 +18,13 @@ declarations
         ;
 
 variable_decl
-        : VAR (ID)+ ':' type
+        : VAR (ID COMMA)* ID ':' type
         ;
 
 type    : INT
+        | FLOAT
+        | BOOL
+        | CHAR
         ;
 
 statements
@@ -31,17 +34,17 @@ statements
 // The different types of instructions
 statement
           // Assignment
-        : left_expr ASSIGN expr ';'           # assignStmt
+        : left_expr ASSIGN expr SEMI           # assignStmt
           // if-then-else statement (else is optional)
         | IF expr THEN statements ENDIF       # ifStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident '(' ')' ';'                   # procCall
+        | ident LBRAC RBRAC SEMI                   # procCall
           // Read a variable
-        | READ left_expr ';'                  # readStmt
+        | READ left_expr SEMI                  # readStmt
           // Write an expression
-        | WRITE expr ';'                      # writeExpr
+        | WRITE expr SEMI                      # writeExpr
           // Write a string
-        | WRITE STRING ';'                    # writeString
+        | WRITE STRING SEMI                    # writeString
         ;
 // Grammar for left expressions (l-values in C++)
 left_expr
@@ -49,11 +52,27 @@ left_expr
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : expr op=MUL expr                    # arithmetic
+expr    : LBRAC expr RBRAC                    # exprBrac
+        | op=NOT expr                         # exprNot
+        | op=PLUS expr                        # arithmetic
+        | op=MINUS expr                       # arithmetic
+        | expr op=MUL expr                    # arithmetic
+        | expr op=DIV expr                    # arithmetic
+        | expr op=MINUS expr                  # arithmetic
         | expr op=PLUS expr                   # arithmetic
-        | expr op=EQ expr                  # relational
+        | expr op=EQ expr                     # relational
+        | expr op=NEQ expr                    # relational
+        | expr op=LT expr                     # relational
+        | expr op=MT expr                     # relational
+        | expr op=LET expr                    # relational
+        | expr op=MET expr                    # relational
         | INTVAL                              # value
+        | FLOATVAL                            # value
+        | BOOLVAL                             # value
+        | CHARVAL                             # value
         | ident                               # exprIdent
+        | expr op=AND expr                    # exprAnd
+        | expr op=OR expr                     # exprOr
         ;
 
 ident   : ID
@@ -73,8 +92,17 @@ LT        : '<'  ;
 MT        : '>'  ;
 LET       : '<=' ;
 MET       : '>=' ;
+
+// Arithmetic operations
 PLUS      : '+'  ;
+MINUS     : '-'  ;
 MUL       : '*'  ;
+DIV       : '/'  ;
+
+
+AND       : 'and';
+OR        : 'or' ;
+NOT       : 'not';
 
 // Key words
 VAR       : 'var'     ;
@@ -102,6 +130,12 @@ CHARVAL   : '\'' ('a'..'z'|'A'..'Z'|'0'..'9'|'\n'|'\t'|'\''|' '|'_'|'@') '\'' ;
 
 // Strings (in quotes) with escape sequences
 STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;
+
+//
+COMMA     : ',' ;
+LBRAC     : '(' ;
+RBRAC     : ')' ;
+SEMI      : ';' ;
 
 fragment
 ESC_SEQ   : '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\') ;

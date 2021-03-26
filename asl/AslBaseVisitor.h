@@ -67,11 +67,27 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *ctx) override {
+  virtual antlrcpp::Any visitExprBrac(AslParser::ExprBracContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExprOr(AslParser::ExprOrContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExprNot(AslParser::ExprNotContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExprAnd(AslParser::ExprAndContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual antlrcpp::Any visitArithmetic(AslParser::ArithmeticContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *ctx) override {
     return visitChildren(ctx);
   }
 
