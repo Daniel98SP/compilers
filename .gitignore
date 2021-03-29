@@ -4,7 +4,13 @@
 
 # But not these files...
 !.gitignore
+!asl/check-examples.sh
+!asl/Makefile
+!asl/main.cpp
 !asl/asl.g4
 !asl/SymbolsVisitor.cpp
+!asl/SymbolsVisitor.h
 !asl/TypeCheckVisitor.cpp
+!asl/TypeCheckVisitor.h
 !asl/CodeGenVisitor.cpp
+!asl/CodeGenVisitor.h
