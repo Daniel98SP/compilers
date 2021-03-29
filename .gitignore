@@ -1,0 +1,10 @@
+# Ignore everything
+*
+
+
+# But not these files...
+!.gitignore
+!asl/asl.g4
+!asl/SymbolsVisitor.cpp
+!asl/TypeCheckVisitor.cpp
+!asl/CodeGenVisitor.cpp
