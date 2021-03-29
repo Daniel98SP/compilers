@@ -74,11 +74,11 @@ public:
   // antlrcpp::Any visitWriteString(AslParser::WriteStringContext *ctx);
   // antlrcpp::Any visitLeft_expr(AslParser::Left_exprContext *ctx);
   // antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *ctx);
-  // antlrcpp::Any visitArithmetic(AslParser::ArithmeticContext *ctx);
-  // antlrcpp::Any visitRelational(AslParser::RelationalContext *ctx);
-  // antlrcpp::Any visitValue(AslParser::ValueContext *ctx);
-  // antlrcpp::Any visitIdent(AslParser::IdentContext *ctx);
-
+  // antlrcpp::Any visitExprArithmetic(AslParser::ExprArithmeticContext *ctx);
+  // antlrcpp::Any visitExprRelational(AslParser::ExprRelationalContext *ctx);
+  // antlrcpp::Any visitExprValue(AslParser::ExprValueContext *ctx);
+  // antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *ctx);
+  
 private:
 
   // Attributes:

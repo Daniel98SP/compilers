@@ -44,7 +44,7 @@
 // #define DEBUG_BUILD
 #include "../common/debug.h"
 
-// using namespace std;
+ using namespace std;
 
 
 // Constructor
@@ -192,7 +192,7 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ctx) {
+antlrcpp::Any TypeCheckVisitor::visitExprArithmetic(AslParser::ExprArithmeticContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->expr(0));
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
@@ -208,7 +208,20 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ctx) {
+antlrcpp::Any TypeCheckVisitor::visitExprArithmeticUnary(AslParser::ExprArithmeticUnaryContext *ctx) {
+  DEBUG_ENTER();
+  visit(ctx->expr());
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
+  if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))))
+    Errors.incompatibleOperator(ctx->op);
+  TypesMgr::TypeId t = Types.createIntegerTy();
+  putTypeDecor(ctx, t);
+  putIsLValueDecor(ctx, false);
+  DEBUG_EXIT();
+  return 0;
+}
+
+antlrcpp::Any TypeCheckVisitor::visitExprRelational(AslParser::ExprRelationalContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->expr(0));
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
@@ -225,11 +238,40 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {
+antlrcpp::Any TypeCheckVisitor::visitExprBoolean(AslParser::ExprBooleanContext *ctx) {
   DEBUG_ENTER();
-  TypesMgr::TypeId t = Types.createIntegerTy();
+  visit(ctx->expr(0));
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
+  visit(ctx->expr(1));
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
+  if (((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1))) or
+      ((not Types.isErrorTy(t2)) and (not Types.isBooleanTy(t2))))
+    Errors.incompatibleOperator(ctx->op);
+  TypesMgr::TypeId t = Types.createBooleanTy();
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
+  DEBUG_EXIT();
+  return 0;
+}
+
+antlrcpp::Any TypeCheckVisitor::visitExprValue(AslParser::ExprValueContext *ctx) {
+  DEBUG_ENTER();
+  if (ctx->INTVAL()) {
+    TypesMgr::TypeId t = Types.createIntegerTy();
+    putTypeDecor(ctx, t);
+  }
+  else if (ctx->FLOATVAL()) {
+    TypesMgr::TypeId t = Types.createFloatTy();
+    putTypeDecor(ctx, t);
+  }
+  else if (ctx->BOOLVAL()) {
+    TypesMgr::TypeId t = Types.createBooleanTy();
+    putTypeDecor(ctx, t);
+  }
+  else if (ctx->CHARVAL()) {
+    TypesMgr::TypeId t = Types.createCharacterTy();
+    putTypeDecor(ctx, t);
+  }
   DEBUG_EXIT();
   return 0;
 }

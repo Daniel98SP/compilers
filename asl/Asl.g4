@@ -5,78 +5,70 @@ grammar Asl;
 //////////////////////////////////////////////////
 
 // A program is a list of functions
-program : function+ EOF
-        ;
+program  : function+ EOF
+         ;
 
 // A function has a name, a list of parameters and a list of statements
-function
-        : FUNC ID '(' ')' declarations statements ENDFUNC
-        ;
+function : FUNC ID '(' ')' declarations statements ENDFUNC
+         ;
 
 declarations
-        : (variable_decl)*
-        ;
+         : (variable_decl)*
+         ;
 
 variable_decl
-        : VAR (ID COMMA)* ID ':' type
-        ;
+         : VAR (ID COMMA)* ID ':' type
+         ;
 
-type    : INT
-        | FLOAT
-        | BOOL
-        | CHAR
-        ;
+type     : INT
+         | FLOAT
+         | BOOL
+         | CHAR
+         ;
 
 statements
-        : (statement)*
-        ;
+         : (statement)*
+         ;
 
 // The different types of instructions
-statement
-          // Assignment
-        : left_expr ASSIGN expr SEMI           # assignStmt
-          // if-then-else statement (else is optional)
-        | IF expr THEN statements ENDIF       # ifStmt
-          // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident LBRAC RBRAC SEMI                   # procCall
-          // Read a variable
-        | READ left_expr SEMI                  # readStmt
-          // Write an expression
-        | WRITE expr SEMI                      # writeExpr
-          // Write a string
-        | WRITE STRING SEMI                    # writeString
-        ;
+statement: left_expr ASSIGN expr SEMI          # assignStmt         // Assignment
+         | IF expr THEN statements ENDIF       # ifStmt             // if-then-else statement (else is optional)
+         | ident LBRAC RBRAC SEMI              # procCall           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
+         | READ left_expr SEMI                 # readStmt           // Read a variable
+         | WRITE expr SEMI                     # writeExpr          // Write an expression
+         | WRITE STRING SEMI                   # writeString        // Write a string
+         ;
 // Grammar for left expressions (l-values in C++)
 left_expr
-        : ident
-        ;
+         : ident
+         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : LBRAC expr RBRAC                    # exprBrac
-        | op=NOT expr                         # exprNot
-        | op=PLUS expr                        # arithmetic
-        | op=MINUS expr                       # arithmetic
-        | expr op=MUL expr                    # arithmetic
-        | expr op=DIV expr                    # arithmetic
-        | expr op=MINUS expr                  # arithmetic
-        | expr op=PLUS expr                   # arithmetic
-        | expr op=EQ expr                     # relational
-        | expr op=NEQ expr                    # relational
-        | expr op=LT expr                     # relational
-        | expr op=MT expr                     # relational
-        | expr op=LET expr                    # relational
-        | expr op=MET expr                    # relational
-        | INTVAL                              # value
-        | FLOATVAL                            # value
-        | BOOLVAL                             # value
-        | CHARVAL                             # value
-        | ident                               # exprIdent
-        | expr op=AND expr                    # exprAnd
-        | expr op=OR expr                     # exprOr
-        ;
+expr     : op=NOT expr                         # exprBooleanUnary
+         | op=PLUS expr                        # exprArithmeticUnary
+         | op=MINUS expr                       # exprArithmeticUnary
+         | expr op=MUL expr                    # exprArithmetic
+         | expr op=DIV expr                    # exprArithmetic
+         | expr op=MINUS expr                  # exprArithmetic
+         | expr op=PLUS expr                   # exprArithmetic
+         | expr op=EQ expr                     # exprRelational
+         | expr op=NEQ expr                    # exprRelational
+         | expr op=LT expr                     # exprRelational
+         | expr op=MT expr                     # exprRelational
+         | expr op=LET expr                    # exprRelational
+         | expr op=MET expr                    # exprRelational
+         | INTVAL                              # exprValue
+         | FLOATVAL                            # exprValue
+         | BOOLVAL                             # exprValue
+         | CHARVAL                             # exprValue
+         | ident                               # exprIdent
+         | expr op=AND expr                    # exprBoolean
+         | expr op=OR expr                     # exprBoolean
+         | LBRAC expr RBRAC                    # exprBrac
+         ;
 
-ident   : ID
-        ;
+ident    : ID
+         ;
 
 //////////////////////////////////////////////////
 /// Lexer Rules
@@ -85,7 +77,7 @@ ident   : ID
 // Assign
 ASSIGN    : '=' ;
 
-// Comparation and arithmetic signs
+// Relational operations
 EQ        : '==' ;
 NEQ       : '!=' ;
 LT        : '<'  ;
@@ -99,7 +91,7 @@ MINUS     : '-'  ;
 MUL       : '*'  ;
 DIV       : '/'  ;
 
-
+// Boolean operations
 AND       : 'and';
 OR        : 'or' ;
 NOT       : 'not';
@@ -119,6 +111,12 @@ ENDFUNC   : 'endfunc' ;
 READ      : 'read'    ;
 WRITE     : 'write'   ;
 
+// Key characters
+COMMA     : ',' ;
+LBRAC     : '(' ;
+RBRAC     : ')' ;
+SEMI      : ';' ;
+
 // ID names
 ID        : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
 
@@ -130,12 +128,6 @@ CHARVAL   : '\'' ('a'..'z'|'A'..'Z'|'0'..'9'|'\n'|'\t'|'\''|' '|'_'|'@') '\'' ;
 
 // Strings (in quotes) with escape sequences
 STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;
-
-//
-COMMA     : ',' ;
-LBRAC     : '(' ;
-RBRAC     : ')' ;
-SEMI      : ';' ;
 
 fragment
 ESC_SEQ   : '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\') ;
