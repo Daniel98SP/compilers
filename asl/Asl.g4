@@ -33,7 +33,9 @@ statements
 // The different types of instructions
 statement: left_expr ASSIGN expr SEMI          # assignStmt         // Assignment
          | IF expr THEN statements ENDIF       # ifStmt             // if-then-else statement (else is optional)
+         | WHILE expr DO statements ENDWHILE   # stmtWhile          // While
          | ident LBRAC RBRAC SEMI              # procCall           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
+         | RETURN SEMI                         # stmtReturn         // Return
          | READ left_expr SEMI                 # readStmt           // Read a variable
          | WRITE expr SEMI                     # writeExpr          // Write an expression
          | WRITE STRING SEMI                   # writeString        // Write a string
@@ -105,9 +107,13 @@ CHAR      : 'char'    ;
 IF        : 'if'      ;
 THEN      : 'then'    ;
 ELSE      : 'else'    ;
+WHILE     : 'while'   ;
+DO        : 'do'      ;
+ENDWHILE  : 'endwhile';
 ENDIF     : 'endif'   ;
 FUNC      : 'func'    ;
 ENDFUNC   : 'endfunc' ;
+RETURN    : 'return'  ;
 READ      : 'read'    ;
 WRITE     : 'write'   ;
 
