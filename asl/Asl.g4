@@ -9,15 +9,19 @@ program  : function+ EOF
          ;
 
 // A function has a name, a list of parameters and a list of statements
-function : FUNC ID '(' ')' declarations statements ENDFUNC
-         ;
+function : FUNC ID LBRAC functionParameters RBRAC functionType declarations statements ENDFUNC
+         ;         
+functionParameters : (ID COLON type COMMA)* (ID COLON type)?
+                   ;
+functionType       : (COLON type)?
+                   ;
 
 declarations
          : (variable_decl)*
          ;
 
 variable_decl
-         : VAR (ID COMMA)* ID ':' type
+         : VAR (ID COMMA)* ID COLON type
          ;
 
 type     : INT
@@ -35,14 +39,14 @@ statement: left_expr ASSIGN expr SEMI          # assignStmt         // Assignmen
          | IF expr THEN statements ENDIF       # ifStmt             // if-then-else statement (else is optional)
          | WHILE expr DO statements ENDWHILE   # stmtWhile          // While
          | ident LBRAC RBRAC SEMI              # procCall           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-         | RETURN SEMI                         # stmtReturn         // Return
+         | RETURN (expr)? SEMI                 # stmtReturn         // Return
          | READ left_expr SEMI                 # readStmt           // Read a variable
          | WRITE expr SEMI                     # writeExpr          // Write an expression
          | WRITE STRING SEMI                   # writeString        // Write a string
          ;
+         
 // Grammar for left expressions (l-values in C++)
-left_expr
-         : ident
+left_expr: ident
          ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
@@ -121,6 +125,7 @@ WRITE     : 'write'   ;
 COMMA     : ',' ;
 LBRAC     : '(' ;
 RBRAC     : ')' ;
+COLON     : ':' ;
 SEMI      : ';' ;
 
 // Data representation
@@ -138,10 +143,7 @@ STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;
 fragment
 ESC_SEQ   : '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\') ;
 
-// Comments (inline C++-style)
-COMMENT   : '//' ~('\n'|'\r')* '\r'? '\n' -> skip ;
 
-// White spaces
+// Ignored tokens (comments and white spaces)
+COMMENT   : '//' ~('\n'|'\r')* '\r'? '\n' -> skip ;
 WS        : (' '|'\t'|'\r'|'\n')+ -> skip ;
-// Alternative description
-// WS        : [ \t\r\n]+ -> skip ;
