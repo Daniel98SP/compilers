@@ -38,7 +38,7 @@ statements
 statement: left_expr ASSIGN expr SEMI          # assignStmt         // Assignment
          | IF expr THEN statements ENDIF       # ifStmt             // if-then-else statement (else is optional)
          | WHILE expr DO statements ENDWHILE   # stmtWhile          // While
-         | ident LBRAC RBRAC SEMI              # procCall           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
+         | ident LBRAC RBRAC SEMI                 # procCall           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
          | RETURN (expr)? SEMI                 # stmtReturn         // Return
          | READ left_expr SEMI                 # readStmt           // Read a variable
          | WRITE expr SEMI                     # writeExpr          // Write an expression
@@ -73,7 +73,7 @@ expr     : op=NOT expr                         # exprBooleanUnary
          | LBRAC expr RBRAC                    # exprBrac
          ;
 
-ident    : ID
+ident    : ID (LSQUARE expr RSQUARE)?
          ;
 
 //////////////////////////////////////////////////
@@ -125,6 +125,8 @@ WRITE     : 'write'   ;
 COMMA     : ',' ;
 LBRAC     : '(' ;
 RBRAC     : ')' ;
+LSQUARE   : '[' ;
+RSQUARE   : ']' ;
 COLON     : ':' ;
 SEMI      : ';' ;
 

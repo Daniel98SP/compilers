@@ -44,7 +44,7 @@
 // #define DEBUG_BUILD
 #include "../common/debug.h"
 
- using namespace std;
+using namespace std;
 
 
 // Constructor
@@ -300,17 +300,35 @@ antlrcpp::Any TypeCheckVisitor::visitExprIdent(AslParser::ExprIdentContext *ctx)
 
 antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
   DEBUG_ENTER();
-  std::string ident = ctx->getText();
-  if (Symbols.findInStack(ident) == -1) {
-    Errors.undeclaredIdent(ctx->ID());
-    TypesMgr::TypeId te = Types.createErrorTy();
-    putTypeDecor(ctx, te);
-    putIsLValueDecor(ctx, true);
+  bool errorFound = false;
+  std::string idName = ctx->ID()->getText();
+  
+  if (ctx->expr()) {
+    visit(ctx->expr());
   }
-  else {
-    TypesMgr::TypeId t1 = Symbols.getType(ident);
-    putTypeDecor(ctx, t1);
-    if (Symbols.isFunctionClass(ident))
+  TypesMgr::TypeId indexType = getTypeDecor(ctx->expr());
+  
+  if (Symbols.findInStack(idName) == -1) {
+    Errors.undeclaredIdent(ctx->ID());
+    putTypeDecor(ctx, Types.createErrorTy());
+    putIsLValueDecor(ctx, true);
+    errorFound = true;
+  }
+  if (not Types.isErrorTy(indexType) and not Types.isArrayTy(Symbols.getType(idName))) {
+    Errors.nonArrayInArrayAccess(ctx);
+    putTypeDecor(ctx, Types.createErrorTy());
+    putIsLValueDecor(ctx, true);
+    errorFound = true;
+  }
+  if (not Types.isErrorTy(indexType) and not Types.isIntegerTy(indexType)) {
+    Errors.nonIntegerIndexInArrayAccess (ctx);
+    putTypeDecor(ctx, Types.createErrorTy());
+    putIsLValueDecor(ctx, true);
+    errorFound = true;
+  }
+  if (not errorFound) {
+    putTypeDecor(ctx, Symbols.getType(idName));
+    if (Symbols.isFunctionClass(idName))
       putIsLValueDecor(ctx, false);
     else
       putIsLValueDecor(ctx, true);
