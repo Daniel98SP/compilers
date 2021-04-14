@@ -86,6 +86,47 @@ antlrcpp::Any TypeCheckVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   return 0;
 }
 
+antlrcpp::Any TypeCheckVisitor::visitExprFuncCall(AslParser::ExprFuncCallContext *ctx) {
+  DEBUG_ENTER();
+  
+  visit(ctx->ident());
+  TypesMgr::TypeId t = getTypeDecor(ctx->ident());
+  
+  if (not Types.isFunctionTy(t) and not Types.isErrorTy(t)) {
+    Errors.isNotCallable(ctx->ident());
+  }
+  
+  if ((not Types.isErrorTy(t)) and Types.isFunctionTy(t)){
+    
+    // Check parameters types
+    std::vector<TypesMgr::TypeId> t_param_orig = Types.getFuncParamsTypes(t);
+    unsigned int num_params = Types.getNumOfParameters(t);
+    
+    if (num_params != ctx->expr().size())
+      Errors.numberOfParameters(ctx->ident());
+    
+    for (unsigned int i = 0; i < ctx->expr().size(); ++i){
+      
+      visit(ctx->expr(i));
+      TypesMgr::TypeId t_param_caller = getTypeDecor(ctx->expr(i));
+      
+      if (i < num_params){
+        if ((not Types.isErrorTy(t_param_caller)) and (not Types.isErrorTy(t_param_orig[i]))
+              and (not Types.copyableTypes(t_param_orig[i], t_param_caller)))
+          Errors.incompatibleParameter(ctx->expr(i), i + 1, ctx);
+      }
+    }
+    
+    // Set return type
+    putTypeDecor(ctx, t);
+    putIsLValueDecor(ctx, false);
+  }
+  
+  DEBUG_EXIT();
+  return 0;
+}
+
+
 // antlrcpp::Any TypeCheckVisitor::visitDeclarations(AslParser::DeclarationsContext *ctx) {
 //   DEBUG_ENTER();
 //   antlrcpp::Any r = visitChildren(ctx);
@@ -203,6 +244,39 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
   return 0;
 }
 
+antlrcpp::Any TypeCheckVisitor::visitExprArrayAcc(AslParser::ExprArrayAccContext *ctx){
+  DEBUG_ENTER();
+  
+  visit(ctx->ident());
+  TypesMgr::TypeId t_ident = getTypeDecor(ctx->ident());
+  visit(ctx->expr());
+  TypesMgr::TypeId t_index = getTypeDecor(ctx->expr());
+  
+  // ident isn't a array var
+  if ((not Types.isErrorTy(t_ident)) and (not Types.isArrayTy(t_ident))) {
+    Errors.nonArrayInArrayAccess(ctx);
+    putTypeDecor(ctx, Types.createErrorTy());
+    putIsLValueDecor(ctx, false);
+  }
+  
+  // expr isn't a int value
+  if ((not Types.isErrorTy(t_index)) and (not Types.isIntegerTy(t_index))){
+    Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+    putTypeDecor(ctx, Types.createErrorTy());
+    putIsLValueDecor(ctx, false);
+  }
+  
+  // Success case
+  if (Types.isArrayTy(t_ident)){
+    putTypeDecor(ctx, Types.getArrayElemType(t_ident));
+    putIsLValueDecor(ctx, true);
+  }
+  
+  DEBUG_EXIT();
+  return 0;
+}
+
+
 antlrcpp::Any TypeCheckVisitor::visitExprArithmetic(AslParser::ExprArithmeticContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->expr(0));
@@ -300,6 +374,23 @@ antlrcpp::Any TypeCheckVisitor::visitExprIdent(AslParser::ExprIdentContext *ctx)
 
 antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
   DEBUG_ENTER();
+  
+  std::string ident = ctx->getText();
+  if (Symbols.findInStack(ident) == -1) {
+    Errors.undeclaredIdent(ctx->ID());
+    TypesMgr::TypeId te = Types.createErrorTy();
+    putTypeDecor(ctx, te);
+    putIsLValueDecor(ctx, true);
+  }
+  else {
+    TypesMgr::TypeId t1 = Symbols.getType(ident);
+    putTypeDecor(ctx, t1);
+    if (Symbols.isFunctionClass(ident))
+      putIsLValueDecor(ctx, false);
+    else
+      putIsLValueDecor(ctx, true);
+
+/*  
   bool errorFound = false;
   std::string idName = ctx->ID()->getText();
   
@@ -332,6 +423,7 @@ antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
       putIsLValueDecor(ctx, false);
     else
       putIsLValueDecor(ctx, true);
+ */
   }
   DEBUG_EXIT();
   return 0;

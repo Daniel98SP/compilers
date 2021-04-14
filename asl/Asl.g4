@@ -34,11 +34,13 @@ statements
          : (statement)*
          ;
 
+
+
 // The different types of instructions
 statement: left_expr ASSIGN expr SEMI          # assignStmt         // Assignment
          | IF expr THEN statements ENDIF       # ifStmt             // if-then-else statement (else is optional)
          | WHILE expr DO statements ENDWHILE   # stmtWhile          // While
-         | ident LBRAC RBRAC SEMI                 # procCall           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
+         | ident LBRAC RBRAC SEMI              # procCall           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
          | RETURN (expr)? SEMI                 # stmtReturn         // Return
          | READ left_expr SEMI                 # readStmt           // Read a variable
          | WRITE expr SEMI                     # writeExpr          // Write an expression
@@ -46,34 +48,36 @@ statement: left_expr ASSIGN expr SEMI          # assignStmt         // Assignmen
          ;
          
 // Grammar for left expressions (l-values in C++)
-left_expr: ident
+left_expr: ident (LSQUARE expr RSQUARE)?
          ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr     : op=NOT expr                         # exprBooleanUnary
-         | op=PLUS expr                        # exprArithmeticUnary
-         | op=MINUS expr                       # exprArithmeticUnary
-         | expr op=MUL expr                    # exprArithmetic
-         | expr op=DIV expr                    # exprArithmetic
-         | expr op=MINUS expr                  # exprArithmetic
-         | expr op=PLUS expr                   # exprArithmetic
-         | expr op=EQ expr                     # exprRelational
-         | expr op=NEQ expr                    # exprRelational
-         | expr op=LT expr                     # exprRelational
-         | expr op=MT expr                     # exprRelational
-         | expr op=LET expr                    # exprRelational
-         | expr op=MET expr                    # exprRelational
-         | INTVAL                              # exprValue
-         | FLOATVAL                            # exprValue
-         | BOOLVAL                             # exprValue
-         | CHARVAL                             # exprValue
-         | ident                               # exprIdent
-         | expr op=AND expr                    # exprBoolean
-         | expr op=OR expr                     # exprBoolean
-         | LBRAC expr RBRAC                    # exprBrac
+expr     : ident LSQUARE expr RSQUARE               # exprArrayAcc
+         | ident LBRAC (expr (COMMA expr)*)? RBRAC  # exprFuncCall
+         | op=NOT expr                              # exprBooleanUnary
+         | op=PLUS expr                             # exprArithmeticUnary
+         | op=MINUS expr                            # exprArithmeticUnary
+         | expr op=MUL expr                         # exprArithmetic
+         | expr op=DIV expr                         # exprArithmetic
+         | expr op=MINUS expr                       # exprArithmetic
+         | expr op=PLUS expr                        # exprArithmetic
+         | expr op=EQ expr                          # exprRelational
+         | expr op=NEQ expr                         # exprRelational
+         | expr op=LT expr                          # exprRelational
+         | expr op=MT expr                          # exprRelational
+         | expr op=LET expr                         # exprRelational
+         | expr op=MET expr                         # exprRelational
+         | INTVAL                                   # exprValue
+         | FLOATVAL                                 # exprValue
+         | BOOLVAL                                  # exprValue
+         | CHARVAL                                  # exprValue
+         | ident                                    # exprIdent
+         | expr op=AND expr                         # exprBoolean
+         | expr op=OR expr                          # exprBoolean
+         | LBRAC expr RBRAC                         # exprBrac
          ;
 
-ident    : ID (LSQUARE expr RSQUARE)?
+ident    : ID
          ;
 
 //////////////////////////////////////////////////
