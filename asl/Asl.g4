@@ -1,3 +1,31 @@
+//////////////////////////////////////////////////////////////////////
+//
+//    Asl - Another simple language (grammar)
+//
+//    Copyright (C) 2017  Universitat Politecnica de Catalunya
+//
+//    This library is free software; you can redistribute it and/or
+//    modify it under the terms of the GNU General Public License
+//    as published by the Free Software Foundation; either version 3
+//    of the License, or (at your option) any later version.
+//
+//    This library is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//    Affero General Public License for more details.
+//
+//    You should have received a copy of the GNU Affero General Public
+//    License along with this library; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+//
+//    contact: José Miguel Rivero (rivero@cs.upc.edu)
+//             Computer Science Department
+//             Universitat Politecnica de Catalunya
+//             despatx Omega.110 - Campus Nord UPC
+//             08034 Barcelona.  SPAIN
+//
+//////////////////////////////////////////////////////////////////////
+
 grammar Asl;
 
 //////////////////////////////////////////////////
@@ -5,143 +33,133 @@ grammar Asl;
 //////////////////////////////////////////////////
 
 // A program is a list of functions
-program  : function+ EOF
-         ;
+program : function+ EOF
+        ;
 
 // A function has a name, a list of parameters and a list of statements
-function : FUNC ID LBRAC functionParameters RBRAC functionType declarations statements ENDFUNC
-         ;         
-functionParameters : (ID COLON type COMMA)* (ID COLON type)?
-                   ;
-functionType       : (COLON type)?
-                   ;
+function
+        : FUNC ID LP function_params RP (':' basic_type)? declarations statements ENDFUNC
+        ;
+        
+function_params
+        : (|ID ':' type (COMMA ID ':' type)*)
+        ;
 
 declarations
-         : (variable_decl)*
-         ;
+        : (variable_decl)*
+        ;
 
 variable_decl
-         : VAR (ID COMMA)* ID COLON type
-         ;
+        : VAR ID (COMMA ID)* ':' type
+        ;
 
-type     : INT
-         | FLOAT
-         | BOOL
-         | CHAR
-         ;
+type    : basic_type
+        | array_type
+        ;
+       
+basic_type
+        : INT
+        | FLOAT
+        | BOOL
+        | CHAR
+        ;
+        
+array_type
+        : ARRAY LS INTVAL RS OF basic_type
+        ;
 
 statements
-         : (statement)*
-         ;
-
-
+        : (statement)*
+        ;
 
 // The different types of instructions
-statement: left_expr ASSIGN expr SEMI          # assignStmt         // Assignment
-         | IF expr THEN statements ENDIF       # ifStmt             // if-then-else statement (else is optional)
-         | WHILE expr DO statements ENDWHILE   # stmtWhile          // While
-         | ident LBRAC RBRAC SEMI              # procCall           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-         | RETURN (expr)? SEMI                 # stmtReturn         // Return
-         | READ left_expr SEMI                 # readStmt           // Read a variable
-         | WRITE expr SEMI                     # writeExpr          // Write an expression
-         | WRITE STRING SEMI                   # writeString        // Write a string
-         ;
-         
+statement
+          // Assignment
+        : left_expr ASSIGN expr ';'                        # assignStmt
+          // if-then-else statement (else is optional)
+        | IF expr THEN statements (ELSE statements)? ENDIF # ifStmt
+          // while statement
+        | WHILE expr DO statements  ENDWHILE               # whileStmt
+          // A function/procedure call has a list of arguments in parenthesis (possibly empty)
+        | ident LP (expr (COMMA expr)*)? RP ';'            # procCall
+          // Read a variable
+        | READ left_expr ';'                               # readStmt
+          // Write an expression
+        | WRITE expr ';'                                   # writeExpr
+          // Write a string
+        | WRITE STRING ';'                                 # writeString
+          // return stuff
+        | RETURN (expr)? ';'                                 # returnStmt 
+        ;
 // Grammar for left expressions (l-values in C++)
-left_expr: ident (LSQUARE expr RSQUARE)?
-         ;
+left_expr
+        : ident (LS expr RS)?
+        ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr     : ident LSQUARE expr RSQUARE               # exprArrayAcc
-         | ident LBRAC (expr (COMMA expr)*)? RBRAC  # exprFuncCall
-         | op=NOT expr                              # exprBooleanUnary
-         | op=PLUS expr                             # exprArithmeticUnary
-         | op=MINUS expr                            # exprArithmeticUnary
-         | expr op=MUL expr                         # exprArithmetic
-         | expr op=DIV expr                         # exprArithmetic
-         | expr op=MINUS expr                       # exprArithmetic
-         | expr op=PLUS expr                        # exprArithmetic
-         | expr op=EQ expr                          # exprRelational
-         | expr op=NEQ expr                         # exprRelational
-         | expr op=LT expr                          # exprRelational
-         | expr op=MT expr                          # exprRelational
-         | expr op=LET expr                         # exprRelational
-         | expr op=MET expr                         # exprRelational
-         | INTVAL                                   # exprValue
-         | FLOATVAL                                 # exprValue
-         | BOOLVAL                                  # exprValue
-         | CHARVAL                                  # exprValue
-         | ident                                    # exprIdent
-         | expr op=AND expr                         # exprBoolean
-         | expr op=OR expr                          # exprBoolean
-         | LBRAC expr RBRAC                         # exprBrac
-         ;
+expr    : LP expr RP                                    # parenthesis
+        | ident LS expr RS                              # array_access
+        | ident LP (expr (COMMA expr)*)? RP             # function_call
+        | op=(NOT|PLUS|SUB) expr                        # unary
+        | expr op=(MUL|DIV|MOD) expr                    # arithmetic
+        | expr op=(PLUS|SUB) expr                       # arithmetic
+        | expr op=(EQUAL|NE|LT|LTE|GT|GTE) expr         # relational
+        | expr op=(AND|OR) expr                         # logical
+        | (INTVAL|FLOATVAL|BOOLVAL|CHARVAL)             # value
+        | ident                                         # exprIdent
+        ;
 
-ident    : ID
-         ;
+ident   : ID
+        ;
 
 //////////////////////////////////////////////////
 /// Lexer Rules
 //////////////////////////////////////////////////
 
-// Assign
+LP        : '(' ;
+RP        : ')' ;
+LS        : '[' ;
+RS        : ']' ;
 ASSIGN    : '=' ;
-
-// Relational operations
-EQ        : '==' ;
-NEQ       : '!=' ;
-LT        : '<'  ;
-MT        : '>'  ;
-LET       : '<=' ;
-MET       : '>=' ;
-
-// Arithmetic operations
-PLUS      : '+'  ;
-MINUS     : '-'  ;
-MUL       : '*'  ;
-DIV       : '/'  ;
-
-// Boolean operations
-AND       : 'and';
+EQUAL     : '==' ;
+NE        : '!=' ;
+NOT       : 'not' ;
+LT        : '<' ;
+GT        : '>' ;
+GTE       : '>=' ;
+LTE       : '<=' ;
+PLUS      : '+' ;
+SUB       : '-' ;
+MUL       : '*' ;
+MOD       : '%' ;
+DIV       : '/' ;
+VAR       : 'var' ;
+ARRAY     : 'array' ;
+OF        : 'of' ;
+INT       : 'int' ;
+BOOL      : 'bool' ;
+FLOAT     : 'float' ;
+CHAR      : 'char' ;
+AND       : 'and' ;
 OR        : 'or' ;
-NOT       : 'not';
-
-// Key words
-VAR       : 'var'     ;
-INT       : 'int'     ;
-FLOAT     : 'float'   ;
-BOOL      : 'bool'    ;
-CHAR      : 'char'    ;
-IF        : 'if'      ;
-THEN      : 'then'    ;
-ELSE      : 'else'    ;
-WHILE     : 'while'   ;
-DO        : 'do'      ;
-ENDWHILE  : 'endwhile';
-ENDIF     : 'endif'   ;
-FUNC      : 'func'    ;
+IF        : 'if' ;
+THEN      : 'then' ;
+ELSE      : 'else' ;
+ENDIF     : 'endif' ;
+FUNC      : 'func' ;
 ENDFUNC   : 'endfunc' ;
-RETURN    : 'return'  ;
-READ      : 'read'    ;
-WRITE     : 'write'   ;
-
-// Key characters
-COMMA     : ',' ;
-LBRAC     : '(' ;
-RBRAC     : ')' ;
-LSQUARE   : '[' ;
-RSQUARE   : ']' ;
-COLON     : ':' ;
-SEMI      : ';' ;
-
-// Data representation
-INTVAL    : ('0'..'9')+ ;
-FLOATVAL  : ('0'..'9')+ '.' ('0'..'9')+ ;
-BOOLVAL   : ('true' | 'false') ;
-CHARVAL   : '\'' ('a'..'z'|'A'..'Z'|'0'..'9'|'\n'|'\t'|'\''|' '|'_'|'@') '\'' ;
-
-// ID names
+RETURN    : 'return' ;
+WHILE     : 'while' ;
+DO        : 'do' ;
+ENDWHILE  : 'endwhile';
+READ      : 'read' ;
+WRITE     : 'write' ;
 ID        : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
+INTVAL    : ('0'..'9')+ ;
+FLOATVAL  : ('0'..'9')+ ('.' ('0'..'9')+)? ;
+CHARVAL   : '\'' (ESC_SEQ| ~('\\'|'\'') ) '\'' ;
+BOOLVAL   : ('true'|'false') ;
+COMMA     : ',' ;
 
 // Strings (in quotes) with escape sequences
 STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;
@@ -149,7 +167,10 @@ STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;
 fragment
 ESC_SEQ   : '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\') ;
 
-
-// Ignored tokens (comments and white spaces)
+// Comments (inline C++-style)
 COMMENT   : '//' ~('\n'|'\r')* '\r'? '\n' -> skip ;
+
+// White spaces
 WS        : (' '|'\t'|'\r'|'\n')+ -> skip ;
+// Alternative description
+// WS        : [ \t\r\n]+ -> skip ;

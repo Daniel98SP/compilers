@@ -66,28 +66,28 @@ public:
   // antlrcpp::Any visitDeclarations(AslParser::DeclarationsContext *ctx);
   // antlrcpp::Any visitVariable_decl(AslParser::Variable_declContext *ctx);
   // antlrcpp::Any visitType(AslParser::TypeContext *ctx);
-  
   antlrcpp::Any visitStatements(AslParser::StatementsContext *ctx);
   antlrcpp::Any visitAssignStmt(AslParser::AssignStmtContext *ctx);
   antlrcpp::Any visitIfStmt(AslParser::IfStmtContext *ctx);
-  antlrcpp::Any visitStmtWhile(AslParser::StmtWhileContext *ctx);
   antlrcpp::Any visitProcCall(AslParser::ProcCallContext *ctx);
-  //antlrcpp::Any visitStmtReturn(AslParser::StmtReturnContext *ctx);
   antlrcpp::Any visitReadStmt(AslParser::ReadStmtContext *ctx);
   antlrcpp::Any visitWriteExpr(AslParser::WriteExprContext *ctx);
   // antlrcpp::Any visitWriteString(AslParser::WriteStringContext *ctx);
-  
-  antlrcpp::Any visitExprArrayAcc(AslParser::ExprArrayAccContext *ctx);
-  antlrcpp::Any visitExprFuncCall(AslParser::ExprFuncCallContext *ctx);
-  
   antlrcpp::Any visitLeft_expr(AslParser::Left_exprContext *ctx);
-  antlrcpp::Any visitExprArithmetic(AslParser::ExprArithmeticContext *ctx);
-  antlrcpp::Any visitExprArithmeticUnary(AslParser::ExprArithmeticUnaryContext *ctx);
-  antlrcpp::Any visitExprRelational(AslParser::ExprRelationalContext *ctx);
-  antlrcpp::Any visitExprBoolean(AslParser::ExprBooleanContext *ctx);
-  antlrcpp::Any visitExprValue(AslParser::ExprValueContext *ctx);
   antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *ctx);
+  antlrcpp::Any visitArithmetic(AslParser::ArithmeticContext *ctx);
+  antlrcpp::Any visitRelational(AslParser::RelationalContext *ctx);
+  antlrcpp::Any visitValue(AslParser::ValueContext *ctx);
   antlrcpp::Any visitIdent(AslParser::IdentContext *ctx);
+  
+  antlrcpp::Any visitWhileStmt(AslParser::WhileStmtContext *ctx);
+  antlrcpp::Any visitReturnStmt(AslParser::ReturnStmtContext *ctx);
+  antlrcpp::Any visitArray_access(AslParser::Array_accessContext *ctx);
+  antlrcpp::Any visitFunction_call(AslParser::Function_callContext *ctx);
+  antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);
+  antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *ctx);
+  antlrcpp::Any visitUnary(AslParser::UnaryContext *ctx);
+  
 
 private:
 

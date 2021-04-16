@@ -143,13 +143,13 @@ antlrcpp::Any CodeGenVisitor::visitIfStmt(AslParser::IfStmtContext *ctx) {
   CodeAttribs     && codAtsE = visit(ctx->expr());
   std::string          addr1 = codAtsE.addr;
   instructionList &    code1 = codAtsE.code;
-  instructionList &&   code2 = visit(ctx->statements());
+  instructionList &&   code2 = visit(ctx->statements(0));
   std::string label = codeCounters.newLabelIF();
   std::string labelEndIf = "endif"+label;
   code = code1 || instruction::FJUMP(addr1, labelEndIf) ||
          code2 || instruction::LABEL(labelEndIf);
   DEBUG_EXIT();
-  return code;
+  return code1;
 }
 
 antlrcpp::Any CodeGenVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
@@ -232,7 +232,7 @@ antlrcpp::Any CodeGenVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx) {
   return codAts;
 }
 
-antlrcpp::Any CodeGenVisitor::visitExprArithmetic(AslParser::ExprArithmeticContext *ctx) {
+antlrcpp::Any CodeGenVisitor::visitArithmetic(AslParser::ArithmeticContext *ctx) {
   DEBUG_ENTER();
   CodeAttribs     && codAt1 = visit(ctx->expr(0));
   std::string         addr1 = codAt1.addr;
@@ -254,7 +254,7 @@ antlrcpp::Any CodeGenVisitor::visitExprArithmetic(AslParser::ExprArithmeticConte
   return codAts;
 }
 
-antlrcpp::Any CodeGenVisitor::visitExprRelational(AslParser::ExprRelationalContext *ctx) {
+antlrcpp::Any CodeGenVisitor::visitRelational(AslParser::RelationalContext *ctx) {
   DEBUG_ENTER();
   CodeAttribs     && codAt1 = visit(ctx->expr(0));
   std::string         addr1 = codAt1.addr;
@@ -273,7 +273,7 @@ antlrcpp::Any CodeGenVisitor::visitExprRelational(AslParser::ExprRelationalConte
   return codAts;
 }
 
-antlrcpp::Any CodeGenVisitor::visitExprValue(AslParser::ExprValueContext *ctx) {
+antlrcpp::Any CodeGenVisitor::visitValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
   instructionList code;
   std::string temp = "%"+codeCounters.newTEMP();

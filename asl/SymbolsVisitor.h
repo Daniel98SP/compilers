@@ -62,10 +62,13 @@ public:
   // Methods to visit each kind of node:
   antlrcpp::Any visitProgram(AslParser::ProgramContext *ctx);
   antlrcpp::Any visitFunction(AslParser::FunctionContext *ctx);
-  antlrcpp::Any visitFunctionParameters(AslParser::FunctionParametersContext *ctx);
+  antlrcpp::Any visitFunction_params(AslParser::Function_paramsContext *ctx);
   antlrcpp::Any visitDeclarations(AslParser::DeclarationsContext *ctx);
   antlrcpp::Any visitVariable_decl(AslParser::Variable_declContext *ctx);
   antlrcpp::Any visitType(AslParser::TypeContext *ctx);
+  antlrcpp::Any visitBasic_type(AslParser::Basic_typeContext *ctx);
+  antlrcpp::Any visitArray_type(AslParser::Array_typeContext *ctx);
+  
   // antlrcpp::Any visitStatements(AslParser::StatementsContext *ctx);
   // antlrcpp::Any visitAssignStmt(AslParser::AssignStmtContext *ctx);
   // antlrcpp::Any visitIfStmt(AslParser::IfStmtContext *ctx);
@@ -75,11 +78,11 @@ public:
   // antlrcpp::Any visitWriteString(AslParser::WriteStringContext *ctx);
   // antlrcpp::Any visitLeft_expr(AslParser::Left_exprContext *ctx);
   // antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *ctx);
-  // antlrcpp::Any visitExprArithmetic(AslParser::ExprArithmeticContext *ctx);
-  // antlrcpp::Any visitExprRelational(AslParser::ExprRelationalContext *ctx);
-  // antlrcpp::Any visitExprValue(AslParser::ExprValueContext *ctx);
-  // antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *ctx);
-  
+  // antlrcpp::Any visitArithmetic(AslParser::ArithmeticContext *ctx);
+  // antlrcpp::Any visitRelational(AslParser::RelationalContext *ctx);
+  // antlrcpp::Any visitValue(AslParser::ValueContext *ctx);
+  // antlrcpp::Any visitIdent(AslParser::IdentContext *ctx);
+
 private:
 
   // Attributes:
