@@ -1,31 +1,3 @@
-//////////////////////////////////////////////////////////////////////
-//
-//    Asl - Another simple language (grammar)
-//
-//    Copyright (C) 2017  Universitat Politecnica de Catalunya
-//
-//    This library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU General Public License
-//    as published by the Free Software Foundation; either version 3
-//    of the License, or (at your option) any later version.
-//
-//    This library is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Affero General Public License for more details.
-//
-//    You should have received a copy of the GNU Affero General Public
-//    License along with this library; if not, write to the Free Software
-//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-//
-//    contact: José Miguel Rivero (rivero@cs.upc.edu)
-//             Computer Science Department
-//             Universitat Politecnica de Catalunya
-//             despatx Omega.110 - Campus Nord UPC
-//             08034 Barcelona.  SPAIN
-//
-//////////////////////////////////////////////////////////////////////
-
 grammar Asl;
 
 //////////////////////////////////////////////////
@@ -133,6 +105,8 @@ SUB       : '-' ;
 MUL       : '*' ;
 MOD       : '%' ;
 DIV       : '/' ;
+
+// Key words
 VAR       : 'var' ;
 ARRAY     : 'array' ;
 OF        : 'of' ;
@@ -154,11 +128,15 @@ DO        : 'do' ;
 ENDWHILE  : 'endwhile';
 READ      : 'read' ;
 WRITE     : 'write' ;
-ID        : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
+
+// Values
 INTVAL    : ('0'..'9')+ ;
 FLOATVAL  : ('0'..'9')+ ('.' ('0'..'9')+)? ;
 CHARVAL   : '\'' (ESC_SEQ| ~('\\'|'\'') ) '\'' ;
 BOOLVAL   : ('true'|'false') ;
+
+// ID
+ID        : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
 COMMA     : ',' ;
 
 // Strings (in quotes) with escape sequences
@@ -172,5 +150,3 @@ COMMENT   : '//' ~('\n'|'\r')* '\r'? '\n' -> skip ;
 
 // White spaces
 WS        : (' '|'\t'|'\r'|'\n')+ -> skip ;
-// Alternative description
-// WS        : [ \t\r\n]+ -> skip ;

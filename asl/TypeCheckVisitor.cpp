@@ -44,7 +44,7 @@
 // #define DEBUG_BUILD
 #include "../common/debug.h"
 
-// using namespace std;
+using namespace std;
 
 
 // Constructor
@@ -96,27 +96,6 @@ antlrcpp::Any TypeCheckVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   DEBUG_EXIT();
   return 0;
 }
-
-// antlrcpp::Any TypeCheckVisitor::visitDeclarations(AslParser::DeclarationsContext *ctx) {
-//   DEBUG_ENTER();
-//   antlrcpp::Any r = visitChildren(ctx);
-//   DEBUG_EXIT();
-//   return r;
-// }
-
-// antlrcpp::Any TypeCheckVisitor::visitVariable_decl(AslParser::Variable_declContext *ctx) {
-//   DEBUG_ENTER();
-//   antlrcpp::Any r = visitChildren(ctx);
-//   DEBUG_EXIT();
-//   return r;
-// }
-
-// antlrcpp::Any TypeCheckVisitor::visitType(AslParser::TypeContext *ctx) {
-//   DEBUG_ENTER();
-//   antlrcpp::Any r = visitChildren(ctx);
-//   DEBUG_EXIT();
-//   return r;
-// }
 
 antlrcpp::Any TypeCheckVisitor::visitStatements(AslParser::StatementsContext *ctx) {
   DEBUG_ENTER();
@@ -221,22 +200,24 @@ antlrcpp::Any TypeCheckVisitor::visitWriteExpr(AslParser::WriteExprContext *ctx)
   return 0;
 }
 
-//might have errors
+
 antlrcpp::Any TypeCheckVisitor::visitReturnStmt(AslParser::ReturnStmtContext *ctx) {    //NEW
   DEBUG_ENTER();
   TypesMgr::TypeId t_func = Symbols.getCurrentFunctionTy();
   
   if (ctx->expr()) {
+    visit(ctx->expr());
     TypesMgr::TypeId t = getTypeDecor(ctx->expr());
     TypesMgr::TypeId t_ret = Types.getFuncReturnType(t_func);
-    //change
+    
     if (not Types.isErrorTy(t) and Types.isVoidFunction(t_func)) {
       Errors.incompatibleReturn(ctx->RETURN());  //funcion VOID salida no void
-    }else if ((not Types.isErrorTy(t)) and (not Types.equalTypes(t, t_ret))){
+    }
+    
+    else if ((not Types.isErrorTy(t)) and (not Types.equalTypes(t, t_ret))){
       if (not (Types.isIntegerTy(t) and Types.isFloatTy(t_ret))) {
         Errors.incompatibleReturn(ctx->RETURN());   //tipos diferentes en el return
-      }
-      
+      }      
     }
   }
   else if (not Types.isVoidFunction(t_func)) {
@@ -247,17 +228,6 @@ antlrcpp::Any TypeCheckVisitor::visitReturnStmt(AslParser::ReturnStmtContext *ct
   
   return 0;
 }
-
-// antlrcpp::Any TypeCheckVisitor::visitWriteString(AslParser::WriteStringContext *ctx) {
-//   DEBUG_ENTER();
-//   antlrcpp::Any r = visitChildren(ctx);
-//   DEBUG_EXIT();
-//   return r;
-// }
-
-/**
- * Expressiones
- */
 
 antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx) {
   DEBUG_ENTER();
