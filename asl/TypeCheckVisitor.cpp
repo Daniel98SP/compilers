@@ -76,16 +76,14 @@ antlrcpp::Any TypeCheckVisitor::visitProgram(AslParser::ProgramContext *ctx) {
 }
 
 
-//maybe needs changes
 antlrcpp::Any TypeCheckVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   DEBUG_ENTER();
-  //change
   TypesMgr::TypeId t = Types.createVoidTy();
-  std::vector<TypesMgr::TypeId> paramTy;
+  vector<TypesMgr::TypeId> paramTy;
   if(ctx->basic_type()){
     t = getTypeDecor(ctx->basic_type());
   }
-  TypesMgr::TypeId t_func = Types.createFunctionTy(paramTy, t); //tipo funcion en scope
+  TypesMgr::TypeId t_func = Types.createFunctionTy(paramTy, t);
   Symbols.setCurrentFunctionTy(t_func);
   
   SymTable::ScopeId sc = getScopeDecor(ctx);
@@ -244,7 +242,7 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
   DEBUG_ENTER();
   visit(ctx->ident());
   TypesMgr::TypeId t_id = getTypeDecor(ctx->ident());
-  bool b = getIsLValueDecor(ctx->ident());
+  bool isL = getIsLValueDecor(ctx->ident());
   
   if (ctx->expr()) {  //if it's an array
     visit(ctx->expr());
@@ -253,7 +251,7 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
     //not type array
     if ((not Types.isErrorTy(t_id)) and (not Types.isArrayTy(t_id))){
       checkArr = false;
-      b = false;
+      isL = false;
       Errors.nonArrayInArrayAccess(ctx->ident());
       t_id = Types.createErrorTy();
     }
@@ -268,7 +266,7 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
   }
   
   putTypeDecor(ctx, t_id);
-  putIsLValueDecor(ctx, b);
+  putIsLValueDecor(ctx, isL);
   DEBUG_EXIT();
   return 0;
 }
@@ -347,26 +345,19 @@ antlrcpp::Any TypeCheckVisitor::visitFunction_call(AslParser::Function_callConte
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx) {    //hace falta???
-  DEBUG_ENTER();
-  
+antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx) {
   visit(ctx->expr());
   TypesMgr::TypeId t = getTypeDecor(ctx->expr());
   
-  //change
   if (ctx->NOT()) {
-    if (not Types.isErrorTy(t) and not Types.isBooleanTy(t))
-      Errors.incompatibleOperator(ctx->op); //dont know which
-    //Errors.booleanRequired(ctx->expr());
-    t = Types.createBooleanTy();
-  }
-  else {
-    if (not Types.isErrorTy(t) and not Types.isIntegerTy(t) and not Types.isFloatTy(t))
+    if ((not Types.isErrorTy(t)) and (not Types.isBooleanTy(t)){
       Errors.incompatibleOperator(ctx->op);
-    if (Types.isFloatTy(t))
-      t = Types.createFloatTy();
-    else 
-      t = Types.createIntegerTy();
+    }
+    t = Types.createBooleanTy();
+  }else {
+    if ((not Types.isErrorTy(t)) and (not Types.isNumericTy(t)){
+      Errors.incompatibleOperator(ctx->op);
+    }
   }
   
   putTypeDecor(ctx, t);
@@ -385,16 +376,17 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   
   TypesMgr::TypeId t = Types.createIntegerTy();
   
-  if (ctx->MOD()) {   //MOD solo a enteros
+  if (ctx->MOD()) {
     if (((not Types.isErrorTy(t1)) and (not Types.isIntegerTy(t1))) or 
           ((not Types.isErrorTy(t2)) and (not Types.isIntegerTy(t2))))
       Errors.incompatibleOperator(ctx->op);
-  }
-  else {
+  }else {
     if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or 
           ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
       Errors.incompatibleOperator(ctx->op);
-    if (Types.isFloatTy(t1) or Types.isFloatTy(t2)) t = Types.createFloatTy();
+    if (((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2))) and 
+          (Types.isFloatTy(t1) or Types.isFloatTy(t2)))
+      t = Types.createFloatTy();
   }
   
   putTypeDecor(ctx, t);
@@ -468,7 +460,7 @@ antlrcpp::Any TypeCheckVisitor::visitExprIdent(AslParser::ExprIdentContext *ctx)
 
 antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
   DEBUG_ENTER();
-  std::string ident = ctx->getText();
+  string ident = ctx->getText();
   if (Symbols.findInStack(ident) == -1) {
     Errors.undeclaredIdent(ctx->ID());
     TypesMgr::TypeId te = Types.createErrorTy();
