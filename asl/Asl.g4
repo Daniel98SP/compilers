@@ -10,11 +10,11 @@ program : function+ EOF
 
 // A function has a name, a list of parameters and a list of statements
 function
-        : FUNC ID LP function_params RP (':' basic_type)? declarations statements ENDFUNC
+        : FUNC ID LP function_params RP (COLON basic_type)? declarations statements ENDFUNC
         ;
         
 function_params
-        : (|ID ':' type (COMMA ID ':' type)*)
+        : (|ID COLON type (COMMA ID COLON type)*)
         ;
 
 declarations
@@ -22,7 +22,7 @@ declarations
         ;
 
 variable_decl
-        : VAR ID (COMMA ID)* ':' type
+        : VAR ID (COMMA ID)* COLON type
         ;
 
 type    : basic_type
@@ -47,21 +47,21 @@ statements
 // The different types of instructions
 statement
           // Assignment
-        : left_expr ASSIGN expr ';'                        # assignStmt
+        : left_expr ASSIGN expr SEMI                       # assignStmt
           // if-then-else statement (else is optional)
         | IF expr THEN statements (ELSE statements)? ENDIF # ifStmt
           // while statement
         | WHILE expr DO statements  ENDWHILE               # whileStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident LP (expr (COMMA expr)*)? RP ';'            # procCall
+        | ident LP (expr (COMMA expr)*)? RP SEMI           # procCall
           // Read a variable
-        | READ left_expr ';'                               # readStmt
+        | READ left_expr SEMI                              # readStmt
           // Write an expression
-        | WRITE expr ';'                                   # writeExpr
+        | WRITE expr SEMI                                  # writeExpr
           // Write a string
-        | WRITE STRING ';'                                 # writeString
+        | WRITE STRING SEMI                                # writeString
           // return stuff
-        | RETURN (expr)? ';'                                 # returnStmt 
+        | RETURN (expr)? SEMI                              # returnStmt 
         ;
 // Grammar for left expressions (l-values in C++)
 left_expr
@@ -92,6 +92,8 @@ LP        : '(' ;
 RP        : ')' ;
 LS        : '[' ;
 RS        : ']' ;
+
+// Logical operations
 ASSIGN    : '=' ;
 EQUAL     : '==' ;
 NE        : '!=' ;
@@ -100,6 +102,8 @@ LT        : '<' ;
 GT        : '>' ;
 GTE       : '>=' ;
 LTE       : '<=' ;
+
+// Arithmetic operations
 PLUS      : '+' ;
 SUB       : '-' ;
 MUL       : '*' ;
@@ -137,7 +141,10 @@ BOOLVAL   : ('true'|'false') ;
 
 // ID
 ID        : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
+
 COMMA     : ',' ;
+COLON     : ':' ;
+SEMI      : ';' ;
 
 // Strings (in quotes) with escape sequences
 STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;
