@@ -320,12 +320,13 @@ antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx) {
   TypesMgr::TypeId t = getTypeDecor(ctx->expr());
   
   if (ctx->NOT()) {
-    if ((not Types.isErrorTy(t)) and (not Types.isBooleanTy(t)){
+    if ((not Types.isErrorTy(t)) and (not Types.isBooleanTy(t))){
       Errors.incompatibleOperator(ctx->op);
     }
     t = Types.createBooleanTy();
-  }else {
-    if ((not Types.isErrorTy(t)) and (not Types.isNumericTy(t)){
+  }
+  else {
+    if ((not Types.isErrorTy(t)) and (not Types.isNumericTy(t))){
       Errors.incompatibleOperator(ctx->op);
     }
   }
