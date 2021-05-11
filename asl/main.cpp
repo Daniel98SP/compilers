@@ -113,7 +113,7 @@ int main(int argc, const char* argv[]) {
   typecheck.visit(tree);
 
   if (errors.getNumberOfSemanticErrors() > 0) {
-    //std::cout << "There are semantic errors: no code generated." << std::endl;
+    std::cout << "There are semantic errors: no code generated." << std::endl;
     return EXIT_FAILURE;
   }
 
