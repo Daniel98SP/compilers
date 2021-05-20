@@ -56,6 +56,10 @@ public:
   antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);
   antlrcpp::Any visitValue(AslParser::ValueContext *ctx);
   antlrcpp::Any visitIdent(AslParser::IdentContext *ctx);
+  antlrcpp::Any visitReturnStmt(AslParser::ReturnStmtContext *ctx);
+  antlrcpp::Any visitFunction_params(AslParser::Function_paramsContext *ctx);
+  antlrcpp::Any visitFunction_call(AslParser::Function_callContext *ctx);
+  antlrcpp::Any visitArray_access(AslParser::Array_accessContext *ctx);
 
 private:
 
