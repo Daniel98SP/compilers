@@ -48,6 +48,15 @@ antlrcpp::Any CodeGenVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   Symbols.pushThisScope(sc);
   subroutine subr(ctx->ID()->getText());
   codeCounters.reset();
+  
+  if (ctx->basic_type()) 
+    subr.add_param("_result");
+  
+  std::vector<std::string> && lparam = visit(ctx->function_params());
+  for (auto & p : lparam) {
+    subr.add_param(p);
+  }
+  
   std::vector<var> && lvars = visit(ctx->declarations());
   for (auto & onevar : lvars) {
     subr.add_var(onevar);
@@ -232,7 +241,7 @@ antlrcpp::Any CodeGenVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   
   code = code || paramsPop;
   
-  CodeAttribs codAts(temp, "", code);
+  //CodeAttribs codAts(temp, "", code);
   //endchange
   // std::string name = ctx->ident()->ID()->getSymbol()->getText();
   //std::string name = ctx->ident()->getText();
@@ -616,7 +625,8 @@ antlrcpp::Any CodeGenVisitor::visitFunction_call(AslParser::Function_callContext
   DEBUG_ENTER();
   //change
   instructionList code;
-  instructionList paramsPush, paramsPop;
+  instructionList paramsPush;
+  instructionList paramsPop;
   auto typesParams = Types.getFuncParamsTypes(getTypeDecor(ctx->ident()));
   std::string temp; //for all temp's
   
