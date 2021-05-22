@@ -49,11 +49,12 @@ antlrcpp::Any CodeGenVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   subroutine subr(ctx->ID()->getText());
   codeCounters.reset();
   
-  if (ctx->basic_type()) 
+  if (ctx->basic_type()) {
     subr.add_param("_result");
+  }
   
-  std::vector<std::string> && lparam = visit(ctx->function_params());
-  for (auto & p : lparam) {
+  std::vector<std::string> && params = visit(ctx->function_params());
+  for (auto & p : params) {
     subr.add_param(p);
   }
   
