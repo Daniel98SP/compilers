@@ -458,6 +458,16 @@ antlrcpp::Any CodeGenVisitor::visitArithmetic(AslParser::ArithmeticContext *ctx)
       code = code || instruction::ADD(temp, addr1, addr2);
     else if (ctx->SUB())
       code = code || instruction::SUB(temp, addr1, addr2);
+    else if (ctx->MOD()) {
+      std::string temp1 = "%"+codeCounters.newTEMP();
+      std::string temp2 = "%"+codeCounters.newTEMP();
+      std::string temp3 = "%"+codeCounters.newTEMP();
+      std::string temp4 = "%"+codeCounters.newTEMP();
+      
+      code = code || instruction::DIV(temp1, addr1, addr2);
+      code = code || instruction::MUL(temp, temp1, addr2);
+      code = code || instruction::SUB(temp, addr1, temp);
+    }
   }
     
   CodeAttribs codAts(temp, "", code);

@@ -16,8 +16,8 @@ func main()
     i = 0;
     while i<10 do
         v1[i] = -i;
-	v2[i] = i*i;
-	i = i+1;
+        v2[i] = i*i;
+        i = i+1;
     endwhile
     write prod_escalar(v1, v2);
     write "\n";
