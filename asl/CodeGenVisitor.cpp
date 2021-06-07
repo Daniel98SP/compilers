@@ -261,7 +261,7 @@ antlrcpp::Any CodeGenVisitor::visitWhileStmt(AslParser::WhileStmtContext *ctx) {
   instructionList &    code1 = codAtsE.code;
   instructionList &&   code2 = visit(ctx->statements());
   std::string label = "while"+codeCounters.newLabelWHILE();
-  std::string labelEndWhile = "endwhile"+label;
+  std::string labelEndWhile = "end"+label;
   code = instruction::LABEL(label) || code1 || instruction::FJUMP(addr1, labelEndWhile) ||
     code2 || instruction::UJUMP(label) || instruction::LABEL(labelEndWhile);
   DEBUG_EXIT();
@@ -344,12 +344,12 @@ antlrcpp::Any CodeGenVisitor::visitWriteExpr(AslParser::WriteExprContext *ctx) {
   instructionList &   code1 = codAt1.code;
   instructionList &    code = code1;
   TypesMgr::TypeId tid1 = getTypeDecor(ctx->expr());
-  if(Types.isIntegerTy(tid1) or Types.isBooleanTy(tid1)){
-    code = code1 || instruction::WRITEI(addr1);
+  if(Types.isCharacterTy(tid1)){
+    code = code1 || instruction::WRITEC(addr1);
   }else if(Types.isFloatTy(tid1)){
     code = code1 || instruction::WRITEF(addr1);
   }else{
-    code = code1 || instruction::WRITEC(addr1);
+    code = code1 || instruction::WRITEI(addr1);
   }
   DEBUG_EXIT();
   return code;
@@ -460,8 +460,13 @@ antlrcpp::Any CodeGenVisitor::visitArithmetic(AslParser::ArithmeticContext *ctx)
       code = code || instruction::DIV(temp, addr1, addr2);
     else if (ctx->SUB())
       code = code || instruction::SUB(temp, addr1, addr2);
-    else
+    else if (ctx->PLUS())
       code = code || instruction::ADD(temp, addr1, addr2);
+    else{
+      code = code   || instruction::DIV(temp, addr1, addr2)
+                    || instruction::MUL(temp, temp, addr2)
+                    || instruction::SUB(temp, addr1, temp);
+    }
   }else{
     std::string addrF1 = addr1;
     std::string addrF2 = addr2;
@@ -610,7 +615,7 @@ antlrcpp::Any CodeGenVisitor::visitValue(AslParser::ValueContext *ctx) {
   }else if(ctx->FLOATVAL()){
     code = instruction::FLOAD(temp, ctx->getText());
   }else if(ctx->CHARVAL()){
-    code = instruction::CHLOAD(temp, ctx->getText());
+    code = instruction::CHLOAD(temp, ctx->getText().substr(1, ctx->getText().length()-2));
   }else{
     if(ctx->getText() == "true"){
       code = instruction::LOAD(temp, "1");

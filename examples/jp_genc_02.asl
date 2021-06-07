@@ -3,7 +3,6 @@ func main()
     var end : bool
     read n;
     aux = n;
-    end = false;
     if n < 0 then
        write "n >= 0!\n";
        end = true;
